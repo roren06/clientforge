@@ -39,6 +39,7 @@ model Workspace {
 
   memberships Membership[]
   clients     Client[]
+  projects    Project[]
 
   @@map("workspaces")
 }
@@ -55,10 +56,31 @@ model Client {
   updatedAt   DateTime   @updatedAt
 
   workspace   Workspace  @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  projects    Project[]
 
   @@unique([workspaceId, email])
   @@index([workspaceId])
   @@map("clients")
+}
+
+model Project {
+  id          String     @id @default(cuid())
+  workspaceId String
+  clientId    String
+  title       String
+  description String?
+  status      String     @default("ACTIVE")
+  progress    Int        @default(0)
+  deadline    DateTime?
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+
+  workspace   Workspace  @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  client      Client     @relation(fields: [clientId], references: [id], onDelete: Cascade)
+
+  @@index([workspaceId])
+  @@index([clientId])
+  @@map("projects")
 }
 
 model Membership {

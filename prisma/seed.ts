@@ -85,6 +85,53 @@ async function main() {
       },
     });
   }
+  
+  const clients = await prisma.client.findMany({
+  where: { workspaceId: workspace.id },
+});
+
+const northstar = clients.find(c => c.name === "Northstar Labs");
+const acme = clients.find(c => c.name === "Acme Studio");
+const vertex = clients.find(c => c.name === "Vertex Health");
+
+const sampleProjects = [
+  {
+    title: "Growth Website Redesign",
+    clientId: northstar?.id,
+    status: "ACTIVE",
+    progress: 65,
+    deadline: new Date("2026-06-15"),
+  },
+  {
+    title: "Client Portal UI",
+    clientId: acme?.id,
+    status: "REVIEW",
+    progress: 90,
+    deadline: new Date("2026-05-30"),
+  },
+  {
+    title: "Healthcare Dashboard",
+    clientId: vertex?.id,
+    status: "PLANNING",
+    progress: 15,
+    deadline: new Date("2026-07-20"),
+  },
+];
+
+for (const project of sampleProjects) {
+  if (!project.clientId) continue;
+
+  await prisma.project.create({
+    data: {
+      workspaceId: workspace.id,
+      clientId: project.clientId,
+      title: project.title,
+      status: project.status,
+      progress: project.progress,
+      deadline: project.deadline,
+    },
+  });
+}
 
   console.log("Seed completed");
 }
