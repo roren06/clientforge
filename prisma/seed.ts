@@ -97,6 +97,7 @@ const vertex = clients.find(c => c.name === "Vertex Health");
 const sampleProjects = [
   {
     title: "Growth Website Redesign",
+    description: "Redesign the client growth website with a more premium landing page and improved conversion flow.",
     clientId: northstar?.id,
     status: "ACTIVE",
     progress: 65,
@@ -104,6 +105,7 @@ const sampleProjects = [
   },
   {
     title: "Client Portal UI",
+    description: "Design and build a client-facing portal experience with better navigation, approvals, and file review flow.",
     clientId: acme?.id,
     status: "REVIEW",
     progress: 90,
@@ -111,6 +113,7 @@ const sampleProjects = [
   },
   {
     title: "Healthcare Dashboard",
+    description: "Plan the first version of an analytics dashboard for healthcare operations and reporting.",
     clientId: vertex?.id,
     status: "PLANNING",
     progress: 15,
@@ -121,16 +124,26 @@ const sampleProjects = [
 for (const project of sampleProjects) {
   if (!project.clientId) continue;
 
+  const existingProject = await prisma.project.findFirst({
+  where: {
+    workspaceId: workspace.id,
+    title: project.title,
+  },
+});
+
+if (!existingProject) {
   await prisma.project.create({
     data: {
       workspaceId: workspace.id,
       clientId: project.clientId,
       title: project.title,
+      description: project.description,
       status: project.status,
       progress: project.progress,
       deadline: project.deadline,
     },
   });
+}
 }
 
   console.log("Seed completed");

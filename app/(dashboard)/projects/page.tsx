@@ -1,4 +1,5 @@
 import { PageShell } from "@/components/layout/page-shell";
+import Link from "next/link";
 
 type Project = {
   id: string;
@@ -43,7 +44,12 @@ export default async function ProjectsPage() {
             {projects.map((project) => (
               <tr key={project.id}>
                 <td className="px-6 py-4 font-medium text-white">
-                  {project.title}
+                <Link
+                    href={`/projects/${project.id}`}
+                    className="transition hover:text-white/80 underline-offset-4 hover:underline"
+                >
+                    {project.title}
+                </Link>
                 </td>
 
                 <td className="px-6 py-4 text-gray-300">
