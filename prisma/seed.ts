@@ -125,25 +125,110 @@ for (const project of sampleProjects) {
   if (!project.clientId) continue;
 
   const existingProject = await prisma.project.findFirst({
-  where: {
-    workspaceId: workspace.id,
-    title: project.title,
-  },
-});
-
-if (!existingProject) {
-  await prisma.project.create({
-    data: {
+    where: {
       workspaceId: workspace.id,
-      clientId: project.clientId,
       title: project.title,
-      description: project.description,
-      status: project.status,
-      progress: project.progress,
-      deadline: project.deadline,
     },
   });
+
+  if (existingProject) {
+    await prisma.project.update({
+      where: {
+        id: existingProject.id,
+      },
+      data: {
+        clientId: project.clientId,
+        title: project.title,
+        description: project.description,
+        status: project.status,
+        progress: project.progress,
+        deadline: project.deadline,
+      },
+    });
+  } else {
+    await prisma.project.create({
+      data: {
+        workspaceId: workspace.id,
+        clientId: project.clientId,
+        title: project.title,
+        description: project.description,
+        status: project.status,
+        progress: project.progress,
+        deadline: project.deadline,
+      },
+    });
+  }
 }
+
+const projects = await prisma.project.findMany({
+  where: { workspaceId: workspace.id },
+});
+
+const growthWebsite = projects.find((p) => p.title === "Growth Website Redesign");
+const clientPortalUi = projects.find((p) => p.title === "Client Portal UI");
+const healthcareDashboard = projects.find((p) => p.title === "Healthcare Dashboard");
+
+const sampleDeliverables = [
+  {
+    projectId: growthWebsite?.id,
+    title: "Homepage Mockup",
+    type: "FIGMA",
+    status: "READY",
+    notes: "Initial premium homepage concept ready for review.",
+  },
+  {
+    projectId: growthWebsite?.id,
+    title: "Landing Page Copy Draft",
+    type: "DOC",
+    status: "IN_PROGRESS",
+    notes: "Copywriting draft for hero, features, and CTA sections.",
+  },
+  {
+    projectId: clientPortalUi?.id,
+    title: "Portal UI Review PDF",
+    type: "PDF",
+    status: "REVIEW",
+    notes: "UI review export waiting for final client feedback.",
+  },
+  {
+    projectId: healthcareDashboard?.id,
+    title: "Analytics Wireframe",
+    type: "FIGMA",
+    status: "PLANNING",
+    notes: "Initial wireframe for reporting layout and KPI placement.",
+  },
+];
+
+for (const deliverable of sampleDeliverables) {
+  if (!deliverable.projectId) continue;
+
+  const existingDeliverable = await prisma.deliverable.findFirst({
+    where: {
+      projectId: deliverable.projectId,
+      title: deliverable.title,
+    },
+  });
+
+  if (existingDeliverable) {
+    await prisma.deliverable.update({
+      where: { id: existingDeliverable.id },
+      data: {
+        type: deliverable.type,
+        status: deliverable.status,
+        notes: deliverable.notes,
+      },
+    });
+  } else {
+    await prisma.deliverable.create({
+      data: {
+        projectId: deliverable.projectId,
+        title: deliverable.title,
+        type: deliverable.type,
+        status: deliverable.status,
+        notes: deliverable.notes,
+      },
+    });
+  }
 }
 
   console.log("Seed completed");

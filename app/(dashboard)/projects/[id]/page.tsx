@@ -18,6 +18,15 @@ type ProjectDetail = {
   };
 };
 
+type Deliverable = {
+  id: string;
+  title: string;
+  type: string;
+  status: string;
+  notes: string | null;
+  createdAt: string;
+};
+
 async function getProject(id: string): Promise<ProjectDetail | null> {
   const baseUrl =
     process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
@@ -32,17 +41,38 @@ async function getProject(id: string): Promise<ProjectDetail | null> {
   return res.json();
 }
 
+async function getDeliverables(
+  id: string
+): Promise<{ deliverables: Deliverable[]; total: number }> {
+  const baseUrl =
+    process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
+
+  const res = await fetch(`${baseUrl}/api/projects/${id}/deliverables`, {
+    cache: "no-store",
+  });
+
+  if (!res.ok) throw new Error("Failed to fetch deliverables");
+
+  return res.json();
+}
+
 export default async function ProjectDetailPage({
   params,
 }: {
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  const project = await getProject(id);
+
+  const [project, deliverablesData] = await Promise.all([
+    getProject(id),
+    getDeliverables(id),
+  ]);
 
   if (!project) {
     notFound();
   }
+
+  const { deliverables, total } = deliverablesData;
 
   return (
     <PageShell
@@ -106,6 +136,47 @@ export default async function ProjectDetailPage({
               <p className="text-xs uppercase tracking-wide text-gray-400">Contact Email</p>
               <p className="mt-2 text-sm text-white">{project.client.email}</p>
             </div>
+          </CardContent>
+        </Card>
+      </section>
+
+      <section className="mt-4">
+        <Card className="rounded-3xl border-white/10 bg-white/[0.03] text-white">
+          <CardHeader>
+            <CardTitle>Deliverables ({total})</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            {deliverables.length === 0 ? (
+              <div className="rounded-2xl border border-white/10 bg-white/[0.02] p-4 text-sm text-gray-400">
+                No deliverables yet for this project.
+              </div>
+            ) : (
+              deliverables.map((deliverable) => (
+                <div
+                  key={deliverable.id}
+                  className="rounded-2xl border border-white/10 bg-white/[0.02] p-4"
+                >
+                  <div className="flex items-start justify-between gap-4">
+                    <div>
+                      <p className="text-base font-medium text-white">
+                        {deliverable.title}
+                      </p>
+                      <p className="mt-1 text-sm text-gray-400">
+                        Type: {deliverable.type} · Status: {deliverable.status}
+                      </p>
+                    </div>
+
+                    <span className="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs text-gray-300">
+                      {deliverable.status}
+                    </span>
+                  </div>
+
+                  <p className="mt-3 text-sm leading-6 text-gray-400">
+                    {deliverable.notes || "No notes provided."}
+                  </p>
+                </div>
+              ))
+            )}
           </CardContent>
         </Card>
       </section>
