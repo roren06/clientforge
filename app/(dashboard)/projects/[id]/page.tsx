@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 import { PageShell } from "@/components/layout/page-shell";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { requireInternalAccess } from "@/lib/guards";
 
 type ProjectDetail = {
   id: string;
@@ -61,6 +62,9 @@ export default async function ProjectDetailPage({
 }: {
   params: Promise<{ id: string }>;
 }) {
+
+  await requireInternalAccess();
+  
   const { id } = await params;
 
   const [project, deliverablesData] = await Promise.all([

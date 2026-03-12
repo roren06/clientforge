@@ -44,6 +44,38 @@ async function main() {
     },
   });
 
+  const clientUserPasswordHash = await bcrypt.hash("client123", 10);
+
+const clientUser = await prisma.user.upsert({
+  where: { email: "client@clientforge.app" },
+  update: {
+    name: "Client Test User",
+    passwordHash: clientUserPasswordHash,
+  },
+  create: {
+    name: "Client Test User",
+    email: "client@clientforge.app",
+    passwordHash: clientUserPasswordHash,
+  },
+});
+
+await prisma.membership.upsert({
+  where: {
+    userId_workspaceId: {
+      userId: clientUser.id,
+      workspaceId: workspace.id,
+    },
+  },
+  update: {
+    role: "CLIENT",
+  },
+  create: {
+    userId: clientUser.id,
+    workspaceId: workspace.id,
+    role: "CLIENT",
+  },
+});
+
   const sampleClients = [
     {
       name: "Northstar Labs",

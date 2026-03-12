@@ -1,5 +1,6 @@
 import { PageShell } from "@/components/layout/page-shell";
 import Link from "next/link";
+import { requireInternalAccess } from "@/lib/guards";
 
 type Project = {
   id: string;
@@ -21,6 +22,8 @@ async function getProjects(): Promise<{ projects: Project[] }> {
 }
 
 export default async function ProjectsPage() {
+  await requireInternalAccess();
+  
   const { projects } = await getProjects();
 
   return (

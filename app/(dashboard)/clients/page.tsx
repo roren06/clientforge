@@ -1,5 +1,6 @@
 import { PageShell } from "@/components/layout/page-shell";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { requireInternalAccess } from "@/lib/guards";
 
 type Client = {
   id: string;
@@ -28,6 +29,8 @@ async function getClients(): Promise<{ clients: Client[]; total: number }> {
 }
 
 export default async function ClientsPage() {
+  await requireInternalAccess();
+
   const { clients, total } = await getClients();
 
   return (
