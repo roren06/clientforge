@@ -1,16 +1,23 @@
 import { PrismaClient } from "@prisma/client";
+import bcrypt from "bcryptjs";
 
 const prisma = new PrismaClient();
 
 async function main() {
+
+  const passwordHash = await bcrypt.hash("password123", 10);
   const user = await prisma.user.upsert({
-    where: { email: "lauren@example.com" },
-    update: {},
-    create: {
-      name: "Lauren John S. Angeles",
-      email: "lauren@example.com",
-    },
-  });
+  where: { email: "angeleslaurenjohn@gmail.com" },
+  update: {
+    name: "Lauren John S. Angeles",
+    passwordHash,
+  },
+  create: {
+    name: "Lauren John S. Angeles",
+    email: "angeleslaurenjohn@gmail.com",
+    passwordHash,
+  },
+});
 
   const workspace = await prisma.workspace.upsert({
     where: { slug: "clientforge-demo" },

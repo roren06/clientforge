@@ -1,6 +1,7 @@
 import { PageShell } from "@/components/layout/page-shell";
 import { StatCard } from "@/components/shared/stat-card";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { requireWorkspaceAccess } from "@/lib/guards";
 
 type DashboardResponse = {
   stats: {
@@ -36,6 +37,7 @@ async function getDashboardData(): Promise<DashboardResponse> {
 }
 
 export default async function DashboardPage() {
+  await requireWorkspaceAccess();
   const { stats, recentActivity } = await getDashboardData();
 
   return (
