@@ -2,6 +2,7 @@ import { notFound } from "next/navigation";
 import { PageShell } from "@/components/layout/page-shell";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { requireInternalAccess } from "@/lib/guards";
+import { DeliverableStatusActions } from "@/components/projects/deliverable-status-actions";
 
 type ProjectDetail = {
   id: string;
@@ -64,7 +65,7 @@ export default async function ProjectDetailPage({
 }) {
 
   await requireInternalAccess();
-  
+
   const { id } = await params;
 
   const [project, deliverablesData] = await Promise.all([
@@ -161,23 +162,30 @@ export default async function ProjectDetailPage({
                   className="rounded-2xl border border-white/10 bg-white/[0.02] p-4"
                 >
                   <div className="flex items-start justify-between gap-4">
-                    <div>
-                      <p className="text-base font-medium text-white">
-                        {deliverable.title}
-                      </p>
-                      <p className="mt-1 text-sm text-gray-400">
-                        Type: {deliverable.type} · Status: {deliverable.status}
-                      </p>
-                    </div>
-
-                    <span className="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs text-gray-300">
-                      {deliverable.status}
-                    </span>
+                  <div>
+                    <p className="text-base font-medium text-white">
+                      {deliverable.title}
+                    </p>
+                    <p className="mt-1 text-sm text-gray-400">
+                      Type: {deliverable.type} · Status: {deliverable.status}
+                    </p>
                   </div>
 
-                  <p className="mt-3 text-sm leading-6 text-gray-400">
-                    {deliverable.notes || "No notes provided."}
-                  </p>
+                  <span className="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs text-gray-300">
+                    {deliverable.status}
+                  </span>
+                </div>
+
+                <div className="mt-3">
+                  <DeliverableStatusActions
+                    deliverableId={deliverable.id}
+                    currentStatus={deliverable.status}
+                  />
+                </div>
+
+                <p className="mt-3 text-sm leading-6 text-gray-400">
+                  {deliverable.notes || "No notes provided."}
+                </p>
                 </div>
               ))
             )}
