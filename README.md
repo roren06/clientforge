@@ -2,9 +2,9 @@
 
 **Live demo:** [https://clientforge-nu.vercel.app](https://clientforge-nu.vercel.app)
 
-ClientForge is a portfolio-grade client portal SaaS for freelancers, agencies, and service teams. It brings client records, project tracking, deliverables, approvals, comments, notifications, analytics, and a scoped client portal into one production-shaped workspace.
+ClientForge is a client portal SaaS for freelancers, agencies, and service teams. It brings client records, project tracking, deliverables, approvals, comments, notifications, analytics, and a scoped client portal into one workspace.
 
-The project is intentionally built to show more than UI: it includes multi-tenant authorization, Cloudinary file storage, input validation, rate limiting, route boundaries, seeded demo data, unit tests, and an end-to-end owner/client workflow.
+Under the hood it includes multi-tenant authorization, Cloudinary file storage, input validation, rate limiting, route boundaries, seeded demo data, unit tests, and an end-to-end owner/client workflow.
 
 ## Screenshots
 
@@ -24,7 +24,7 @@ Seeded credentials for local development and the public demo:
 
 ```txt
 Owner
-Email: angeleslaurenjohn@gmail.com
+Email: demoacc@gmail.com
 Password: password123
 
 Client

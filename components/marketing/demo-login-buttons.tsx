@@ -21,7 +21,7 @@ const demoAccounts: Record<
   owner: {
     label: "Explore as Owner",
     helper: "Dashboard, clients, projects, uploads, analytics",
-    email: "angeleslaurenjohn@gmail.com",
+    email: "demoacc@gmail.com",
     password: "password123",
     destination: "/dashboard",
   },

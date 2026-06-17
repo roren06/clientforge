@@ -11,7 +11,7 @@
 - **Current status after the June 17 restart:** portal tenancy, the main object-level API authorization gaps, local upload storage, auth secret naming, basic route boundaries, core input validation, rate limiting, permission tests, an owner/client deliverable e2e flow, a real README, one-click demo entry points, richer landing sections, metadata/OpenGraph defaults, real global search, AI summaries with fallback, analytics charts, a more polished client portal experience, lightweight client portal invites, basic client creation, basic project creation, basic deliverable creation, and project completion actions have been added. The next highest-priority blocker is production deployment verification.
 - **You are realistically at the end of Phase 8, with partial slices of Phases 9–12 already built.** You jumped ahead and built notifications, comments, deliverable workflow, and a portal. The biggest remaining "done but not production-ready" areas are real AI, command palette polish, and production deployment verification.
 - **You CAN recover your login right now.** Your owner credentials are hard-coded in `prisma/seed.ts`:
-  - Owner: `angeleslaurenjohn@gmail.com` / `password123`
+  - Owner: `demoacc@gmail.com` / `password123`
   - Client test user: `client@clientforge.app` / `client123`
   - If the DB was reset, just re-run the seed. (Full recovery steps in Section 7.)
 - **Two things are still actively weak for production / portfolio review:**
@@ -164,7 +164,7 @@ Your current `components/marketing/hero.tsx` is a single hero with three feature
 
 ### B. Recover access (you already have credentials)
 The seed file contains your owner login:
-- Email: `angeleslaurenjohn@gmail.com`
+- Email: `demoacc@gmail.com`
 - Password: `password123`
 
 Try logging in with those first. If the DB was wiped, regenerate everything:

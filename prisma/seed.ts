@@ -6,18 +6,27 @@ const prisma = new PrismaClient();
 async function main() {
 
   const passwordHash = await bcrypt.hash("password123", 10);
+
+  await prisma.user.updateMany({
+    where: { email: "angeleslaurenjohn@gmail.com" },
+    data: {
+      email: "demoacc@gmail.com",
+      name: "Demo Owner",
+    },
+  });
+
   const user = await prisma.user.upsert({
-  where: { email: "angeleslaurenjohn@gmail.com" },
-  update: {
-    name: "Lauren John S. Angeles",
-    passwordHash,
-  },
-  create: {
-    name: "Lauren John S. Angeles",
-    email: "angeleslaurenjohn@gmail.com",
-    passwordHash,
-  },
-});
+    where: { email: "demoacc@gmail.com" },
+    update: {
+      name: "Demo Owner",
+      passwordHash,
+    },
+    create: {
+      name: "Demo Owner",
+      email: "demoacc@gmail.com",
+      passwordHash,
+    },
+  });
 
   const workspace = await prisma.workspace.upsert({
     where: { slug: "clientforge-demo" },

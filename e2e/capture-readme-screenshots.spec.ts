@@ -4,7 +4,7 @@ import path from "node:path";
 
 const outputDir = path.join(process.cwd(), "public", "screenshots");
 
-const ownerEmail = "angeleslaurenjohn@gmail.com";
+const ownerEmail = "demoacc@gmail.com";
 const ownerPassword = "password123";
 const clientEmail = "client@clientforge.app";
 const clientPassword = "client123";

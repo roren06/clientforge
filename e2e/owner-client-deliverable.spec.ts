@@ -3,7 +3,7 @@ import { PrismaClient } from "@prisma/client";
 
 const prisma = new PrismaClient();
 
-const ownerEmail = "angeleslaurenjohn@gmail.com";
+const ownerEmail = "demoacc@gmail.com";
 const ownerPassword = "password123";
 const clientEmail = "client@clientforge.app";
 const clientPassword = "client123";

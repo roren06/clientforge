@@ -24,7 +24,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "ClientForge - Client Work From Kickoff To Sign-off",
     description:
-      "A portfolio-grade client portal SaaS built with Next.js, Prisma, PostgreSQL, Cloudinary, and NextAuth.",
+      "A client portal SaaS for agencies and service teams, built with Next.js, Prisma, PostgreSQL, Cloudinary, and NextAuth.",
   },
 };
 
