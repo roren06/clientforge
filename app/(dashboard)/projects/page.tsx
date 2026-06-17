@@ -1,6 +1,7 @@
 import { PageShell } from "@/components/layout/page-shell";
 import { AddProjectForm } from "@/components/projects/add-project-form";
 import Link from "next/link";
+import { getAppBaseUrl } from "@/lib/app-url";
 import { requireInternalAccess } from "@/lib/guards";
 import { cookies } from "next/headers";
 
@@ -22,7 +23,7 @@ type Client = {
 };
 
 async function getProjects(): Promise<{ projects: Project[] }> {
-  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
+  const baseUrl = getAppBaseUrl();
   const cookieHeader = (await cookies()).toString();
 
   const res = await fetch(`${baseUrl}/api/projects`, {
@@ -40,7 +41,7 @@ async function getProjects(): Promise<{ projects: Project[] }> {
 }
 
 async function getClients(): Promise<{ clients: Client[] }> {
-  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
+  const baseUrl = getAppBaseUrl();
   const cookieHeader = (await cookies()).toString();
 
   const res = await fetch(`${baseUrl}/api/clients`, {

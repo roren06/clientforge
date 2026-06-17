@@ -1,12 +1,11 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import { AuthSessionProvider } from "@/components/providers/session-provider";
+import { getAppBaseUrl } from "@/lib/app-url";
 
 
 export const metadata: Metadata = {
-  metadataBase: new URL(
-    process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"
-  ),
+  metadataBase: new URL(getAppBaseUrl()),
   title: {
     default: "ClientForge - Client Work From Kickoff To Sign-off",
     template: "%s | ClientForge",

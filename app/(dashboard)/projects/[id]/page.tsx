@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 import { PageShell } from "@/components/layout/page-shell";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { getAppBaseUrl } from "@/lib/app-url";
 import { requireInternalAccess } from "@/lib/guards";
 import { DeliverableStatusActions } from "@/components/projects/deliverable-status-actions";
 import { AddDeliverableForm } from "@/components/projects/add-deliverable-form";
@@ -51,8 +52,7 @@ type ActivityItem = {
 };
 
 async function getProject(id: string): Promise<ProjectDetail | null> {
-  const baseUrl =
-    process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
+  const baseUrl = getAppBaseUrl();
   const cookieHeader = (await cookies()).toString();
 
   const res = await fetch(`${baseUrl}/api/projects/${id}`, {
@@ -71,8 +71,7 @@ async function getProject(id: string): Promise<ProjectDetail | null> {
 async function getDeliverables(
   id: string
 ): Promise<{ deliverables: Deliverable[]; total: number }> {
-  const baseUrl =
-    process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
+  const baseUrl = getAppBaseUrl();
   const cookieHeader = (await cookies()).toString();
 
   const res = await fetch(`${baseUrl}/api/projects/${id}/deliverables`, {

@@ -1,6 +1,7 @@
 import { PageShell } from "@/components/layout/page-shell";
 import { StatCard } from "@/components/shared/stat-card";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { getAppBaseUrl } from "@/lib/app-url";
 import { requireInternalAccess } from "@/lib/guards";
 import { prisma } from "@/lib/prisma";
 import { cookies } from "next/headers";
@@ -37,7 +38,7 @@ type AnalyticsOverview = {
 };
 
 async function getDashboardData(): Promise<DashboardResponse> {
-  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
+  const baseUrl = getAppBaseUrl();
   const cookieHeader = (await cookies()).toString();
 
   const res = await fetch(`${baseUrl}/api/dashboard`, {

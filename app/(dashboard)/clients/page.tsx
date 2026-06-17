@@ -2,6 +2,7 @@ import { PageShell } from "@/components/layout/page-shell";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { AddClientForm } from "@/components/clients/add-client-form";
 import { ClientInviteButton } from "@/components/clients/client-invite-button";
+import { getAppBaseUrl } from "@/lib/app-url";
 import { requireInternalAccess } from "@/lib/guards";
 import { cookies } from "next/headers";
 
@@ -18,8 +19,7 @@ type Client = {
 };
 
 async function getClients(): Promise<{ clients: Client[]; total: number }> {
-  const baseUrl =
-    process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
+  const baseUrl = getAppBaseUrl();
   const cookieHeader = (await cookies()).toString();
 
   const res = await fetch(`${baseUrl}/api/clients`, {
