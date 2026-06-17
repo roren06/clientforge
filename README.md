@@ -12,6 +12,14 @@ Under the hood it includes multi-tenant authorization, Cloudinary file storage, 
 | --- | --- |
 | ![ClientForge landing page](./public/screenshots/landing.png) | ![Owner dashboard](./public/screenshots/owner-dashboard.png) |
 
+| Clients | Projects |
+| --- | --- |
+| ![Clients workspace](./public/screenshots/clients.png) | ![Projects workspace](./public/screenshots/projects.png) |
+
+| Analytics | Notifications |
+| --- | --- |
+| ![Analytics overview](./public/screenshots/analytics.png) | ![Notifications inbox](./public/screenshots/notifications.png) |
+
 | Project detail | Client portal |
 | --- | --- |
 | ![Project detail with deliverables](./public/screenshots/project-detail.png) | ![Scoped client portal](./public/screenshots/client-portal.png) |

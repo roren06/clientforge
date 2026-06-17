@@ -17,6 +17,15 @@ async function login(page: Page, email: string, password: string) {
   await page.waitForURL(/\/(dashboard|portal)/);
 }
 
+async function captureRoute(page: Page, route: string, filename: string) {
+  await page.goto(route);
+  await page.waitForLoadState("networkidle");
+  await page.screenshot({
+    path: path.join(outputDir, filename),
+    fullPage: false,
+  });
+}
+
 test("capture README screenshots", async ({ browser }) => {
   fs.mkdirSync(outputDir, { recursive: true });
 
@@ -34,12 +43,12 @@ test("capture README screenshots", async ({ browser }) => {
     viewport: { width: 1440, height: 900 },
   });
   await login(ownerPage, ownerEmail, ownerPassword);
-  await ownerPage.goto("/dashboard");
-  await ownerPage.waitForLoadState("networkidle");
-  await ownerPage.screenshot({
-    path: path.join(outputDir, "owner-dashboard.png"),
-    fullPage: false,
-  });
+
+  await captureRoute(ownerPage, "/dashboard", "owner-dashboard.png");
+  await captureRoute(ownerPage, "/clients", "clients.png");
+  await captureRoute(ownerPage, "/projects", "projects.png");
+  await captureRoute(ownerPage, "/analytics", "analytics.png");
+  await captureRoute(ownerPage, "/notifications", "notifications.png");
 
   await ownerPage.goto("/projects");
   await ownerPage.getByRole("link", { name: "Growth Website Redesign" }).first().click();
@@ -53,12 +62,7 @@ test("capture README screenshots", async ({ browser }) => {
     viewport: { width: 1440, height: 900 },
   });
   await login(clientPage, clientEmail, clientPassword);
-  await clientPage.goto("/portal");
-  await clientPage.waitForLoadState("networkidle");
-  await clientPage.screenshot({
-    path: path.join(outputDir, "client-portal.png"),
-    fullPage: false,
-  });
+  await captureRoute(clientPage, "/portal", "client-portal.png");
 
   await landingPage.close();
   await ownerPage.close();
