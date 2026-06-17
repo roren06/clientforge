@@ -80,6 +80,7 @@ await prisma.membership.upsert({
     {
       name: "Northstar Labs",
       email: "hello@northstarlabs.com",
+      userId: clientUser.id,
       company: "Northstar Labs",
       status: "ACTIVE",
       notes: "Main retainer client for growth website work.",
@@ -87,6 +88,7 @@ await prisma.membership.upsert({
     {
       name: "Acme Studio",
       email: "team@acmestudio.com",
+      userId: null,
       company: "Acme Studio",
       status: "ACTIVE",
       notes: "Needs fast approval workflow and design feedback.",
@@ -94,6 +96,7 @@ await prisma.membership.upsert({
     {
       name: "Vertex Health",
       email: "contact@vertexhealth.com",
+      userId: null,
       company: "Vertex Health",
       status: "LEAD",
       notes: "Potential new client discussing portal redesign.",
@@ -101,6 +104,24 @@ await prisma.membership.upsert({
   ];
 
   for (const client of sampleClients) {
+    const updateData = {
+      name: client.name,
+      userId: client.userId,
+      company: client.company,
+      status: client.status,
+      notes: client.notes,
+    };
+
+    const createData = {
+      workspaceId: workspace.id,
+      userId: client.userId,
+      name: client.name,
+      email: client.email,
+      company: client.company,
+      status: client.status,
+      notes: client.notes,
+    };
+
     await prisma.client.upsert({
       where: {
         workspaceId_email: {
@@ -108,20 +129,8 @@ await prisma.membership.upsert({
           email: client.email,
         },
       },
-      update: {
-        name: client.name,
-        company: client.company,
-        status: client.status,
-        notes: client.notes,
-      },
-      create: {
-        workspaceId: workspace.id,
-        name: client.name,
-        email: client.email,
-        company: client.company,
-        status: client.status,
-        notes: client.notes,
-      },
+      update: updateData,
+      create: createData,
     });
   }
   

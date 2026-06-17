@@ -1,26 +1,20 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { requireInternalAccess } from "@/lib/guards";
 
 export async function GET() {
+  const result = await requireInternalAccess();
+
   try {
-    const workspace = await prisma.workspace.findFirst();
-
-    if (!workspace) {
-      return NextResponse.json(
-        { error: "Workspace not found" },
-        { status: 404 }
-      );
-    }
-
     const [clientsCount, projects] = await Promise.all([
       prisma.client.count({
         where: {
-          workspaceId: workspace.id,
+          workspaceId: result.workspace.id,
         },
       }),
       prisma.project.findMany({
         where: {
-          workspaceId: workspace.id,
+          workspaceId: result.workspace.id,
         },
         include: {
           client: true,

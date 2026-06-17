@@ -3,6 +3,8 @@ import CredentialsProvider from "next-auth/providers/credentials";
 import bcrypt from "bcryptjs";
 import { prisma } from "@/lib/prisma";
 
+export const authSecret = process.env.NEXTAUTH_SECRET ?? process.env.AUTH_SECRET;
+
 export const authOptions: NextAuthOptions = {
   session: {
     strategy: "jwt",
@@ -63,5 +65,5 @@ export const authOptions: NextAuthOptions = {
       return session;
     },
   },
-  secret: process.env.AUTH_SECRET,
+  secret: authSecret,
 };

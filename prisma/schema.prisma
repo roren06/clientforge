@@ -26,6 +26,13 @@ model User {
 
   memberships  Membership[]
   sessions     Session[]
+  clients      Client[]
+
+  notifications     Notification[] @relation("UserNotifications")
+  actedNotifications Notification[] @relation("NotificationActor")
+
+  activityLogs ActivityLog[]
+  comments Comment[]
 
   @@map("users")
 }
@@ -42,12 +49,17 @@ model Workspace {
   clients     Client[]
   projects    Project[]
 
+  activityLogs ActivityLog[]
+
+  notifications Notification[]
+
   @@map("workspaces")
 }
 
 model Client {
   id          String     @id @default(cuid())
   workspaceId String
+  userId      String?
   name        String
   email       String
   company     String?
@@ -57,10 +69,13 @@ model Client {
   updatedAt   DateTime   @updatedAt
 
   workspace   Workspace  @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  user        User?      @relation(fields: [userId], references: [id], onDelete: SetNull)
   projects    Project[]
 
   @@unique([workspaceId, email])
   @@index([workspaceId])
+  @@index([userId])
+  @@index([workspaceId, userId])
   @@map("clients")
 }
 
@@ -80,6 +95,10 @@ model Project {
   client      Client     @relation(fields: [clientId], references: [id], onDelete: Cascade)
   deliverables Deliverable[]
 
+  activityLogs ActivityLog[]
+
+  notifications Notification[]
+
   @@index([workspaceId])
   @@index([clientId])
   @@map("projects")
@@ -92,14 +111,42 @@ model Deliverable {
   type        String
   status      String    @default("PENDING")
   fileUrl     String?
+  fileName    String?
+  fileSize    Int?
+  fileType    String?
   notes       String?
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
 
   project     Project   @relation(fields: [projectId], references: [id], onDelete: Cascade)
 
+  notifications Notification[]
+  comments Comment[]
+
   @@index([projectId])
   @@map("deliverables")
+}
+
+model ActivityLog {
+  id          String   @id @default(cuid())
+
+  workspaceId String
+  projectId   String
+  userId      String?
+
+  type        String
+  message     String
+
+  createdAt   DateTime @default(now())
+
+  workspace Workspace @relation(fields: [workspaceId], references: [id])
+  project   Project   @relation(fields: [projectId], references: [id])
+  user      User?     @relation(fields: [userId], references: [id])
+
+  notifications Notification[]
+
+  @@index([projectId])
+  @@index([workspaceId])
 }
 
 model Membership {
@@ -131,4 +178,61 @@ model Session {
 
   @@index([userId])
   @@map("sessions")
+}
+
+enum NotificationType {
+  DELIVERABLE_CREATED
+  DELIVERABLE_APPROVED
+  DELIVERABLE_REVISION_REQUESTED
+  PROJECT_STATUS_CHANGED
+}
+
+model Notification {
+  id            String           @id @default(cuid())
+  workspaceId   String
+  userId        String
+  actorId       String?
+  projectId     String?
+  deliverableId String?
+  activityLogId String?
+
+  type          NotificationType
+  title         String
+  message       String
+  link          String?
+
+  isRead        Boolean          @default(false)
+  readAt        DateTime?
+
+  createdAt     DateTime         @default(now())
+  updatedAt     DateTime         @updatedAt
+
+  workspace     Workspace        @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  user          User             @relation("UserNotifications", fields: [userId], references: [id], onDelete: Cascade)
+  actor         User?            @relation("NotificationActor", fields: [actorId], references: [id], onDelete: SetNull)
+  project       Project?         @relation(fields: [projectId], references: [id], onDelete: SetNull)
+  deliverable   Deliverable?     @relation(fields: [deliverableId], references: [id], onDelete: SetNull)
+  activityLog   ActivityLog?     @relation(fields: [activityLogId], references: [id], onDelete: SetNull)
+
+  @@index([userId, isRead, createdAt])
+  @@index([workspaceId, userId])
+  @@index([projectId])
+  @@index([deliverableId])
+  @@map("notifications")
+}
+
+model Comment {
+  id            String      @id @default(cuid())
+  deliverableId String
+  userId        String
+  body          String
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+
+  deliverable   Deliverable @relation(fields: [deliverableId], references: [id], onDelete: Cascade)
+  user          User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([deliverableId, createdAt])
+  @@index([userId])
+  @@map("comments")
 }

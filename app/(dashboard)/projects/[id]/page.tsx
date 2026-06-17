@@ -3,6 +3,13 @@ import { PageShell } from "@/components/layout/page-shell";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { requireInternalAccess } from "@/lib/guards";
 import { DeliverableStatusActions } from "@/components/projects/deliverable-status-actions";
+import { AddDeliverableForm } from "@/components/projects/add-deliverable-form";
+import { ProjectCompleteAction } from "@/components/projects/project-complete-action";
+import { prisma } from "@/lib/prisma";
+import { generateProjectSummary } from "@/lib/ai/project-summary";
+import { DeliverableFileUpload } from "@/components/projects/deliverable-file-upload";
+import { DeliverableComments } from "@/components/projects/deliverable-comments";
+import { cookies } from "next/headers";
 
 type ProjectDetail = {
   id: string;
@@ -27,14 +34,32 @@ type Deliverable = {
   status: string;
   notes: string | null;
   createdAt: string;
+
+  fileUrl?: string | null;
+  fileName?: string | null;
+  fileSize?: number | null;
+  fileType?: string | null;
+};
+
+type ActivityItem = {
+  id: string;
+  message: string;
+  createdAt: Date;
+  user?: {
+    name?: string | null;
+  } | null;
 };
 
 async function getProject(id: string): Promise<ProjectDetail | null> {
   const baseUrl =
     process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
+  const cookieHeader = (await cookies()).toString();
 
   const res = await fetch(`${baseUrl}/api/projects/${id}`, {
     cache: "no-store",
+    headers: {
+      Cookie: cookieHeader,
+    },
   });
 
   if (res.status === 404) return null;
@@ -48,14 +73,37 @@ async function getDeliverables(
 ): Promise<{ deliverables: Deliverable[]; total: number }> {
   const baseUrl =
     process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
+  const cookieHeader = (await cookies()).toString();
 
   const res = await fetch(`${baseUrl}/api/projects/${id}/deliverables`, {
     cache: "no-store",
+    headers: {
+      Cookie: cookieHeader,
+    },
   });
 
   if (!res.ok) throw new Error("Failed to fetch deliverables");
 
   return res.json();
+}
+
+async function getActivity(projectId: string): Promise<ActivityItem[]> {
+  return prisma.activityLog.findMany({
+    where: {
+      projectId,
+    },
+    orderBy: {
+      createdAt: "desc",
+    },
+    take: 20,
+    include: {
+      user: {
+        select: {
+          name: true,
+        },
+      },
+    },
+  });
 }
 
 export default async function ProjectDetailPage({
@@ -68,16 +116,19 @@ export default async function ProjectDetailPage({
 
   const { id } = await params;
 
-  const [project, deliverablesData] = await Promise.all([
-    getProject(id),
-    getDeliverables(id),
-  ]);
+  const [project, deliverablesData, activity] = await Promise.all([
+  getProject(id),
+  getDeliverables(id),
+  getActivity(id),
+]);
 
   if (!project) {
     notFound();
   }
 
   const { deliverables, total } = deliverablesData;
+
+  const aiSummary = await generateProjectSummary(project, deliverables, activity);
 
   return (
     <PageShell
@@ -124,6 +175,12 @@ export default async function ProjectDetailPage({
                 </p>
               </div>
             </div>
+
+            <ProjectCompleteAction
+              projectId={project.id}
+              currentStatus={project.status}
+              currentProgress={project.progress}
+            />
           </CardContent>
         </Card>
 
@@ -146,11 +203,43 @@ export default async function ProjectDetailPage({
       </section>
 
       <section className="mt-4">
+  <Card className="rounded-3xl border-cyan-400/20 bg-cyan-400/[0.04] text-white">
+    <CardHeader>
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <CardTitle>AI Project Summary</CardTitle>
+        <span className="rounded-full border border-cyan-300/20 bg-cyan-300/10 px-3 py-1 text-xs text-cyan-100">
+          {aiSummary.source === "ai" ? "AI generated" : "Fallback summary"}
+        </span>
+      </div>
+    </CardHeader>
+
+    <CardContent className="space-y-4">
+      <p className="text-sm leading-7 text-gray-200">
+        {aiSummary.summary}
+      </p>
+
+      <div className="grid gap-3 md:grid-cols-2">
+        {aiSummary.highlights.map((item) => (
+          <div
+            key={item}
+            className="rounded-2xl border border-white/10 bg-white/[0.03] p-4 text-sm text-gray-300"
+          >
+            {item}
+          </div>
+        ))}
+      </div>
+    </CardContent>
+  </Card>
+</section>
+
+      <section className="mt-4">
         <Card className="rounded-3xl border-white/10 bg-white/[0.03] text-white">
           <CardHeader>
             <CardTitle>Deliverables ({total})</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
+            <AddDeliverableForm projectId={project.id} />
+
             {deliverables.length === 0 ? (
               <div className="rounded-2xl border border-white/10 bg-white/[0.02] p-4 text-sm text-gray-400">
                 No deliverables yet for this project.
@@ -159,6 +248,7 @@ export default async function ProjectDetailPage({
               deliverables.map((deliverable) => (
                 <div
                   key={deliverable.id}
+                  data-testid={`deliverable-card-${deliverable.id}`}
                   className="rounded-2xl border border-white/10 bg-white/[0.02] p-4"
                 >
                   <div className="flex items-start justify-between gap-4">
@@ -183,15 +273,59 @@ export default async function ProjectDetailPage({
                   />
                 </div>
 
+                <div className="mt-3">
+                  <DeliverableFileUpload
+                    deliverableId={deliverable.id}
+                    existingFileUrl={deliverable.fileUrl}
+                    existingFileName={deliverable.fileName}
+                  />
+                </div>
+
                 <p className="mt-3 text-sm leading-6 text-gray-400">
                   {deliverable.notes || "No notes provided."}
                 </p>
+
+                <div className="mt-4">
+                  <DeliverableComments deliverableId={deliverable.id} />
+                </div>
+
                 </div>
               ))
             )}
           </CardContent>
         </Card>
       </section>
+      <section className="mt-4">
+  <Card className="rounded-3xl border-white/10 bg-white/[0.03] text-white">
+    <CardHeader>
+      <CardTitle>Activity</CardTitle>
+    </CardHeader>
+
+    <CardContent className="space-y-3">
+      {activity.length === 0 ? (
+        <div className="rounded-xl border border-white/10 bg-white/[0.02] p-4 text-sm text-gray-400">
+          No activity yet.
+        </div>
+      ) : (
+        activity.map((item: ActivityItem) => (
+          <div
+            key={item.id}
+            className="rounded-xl border border-white/10 bg-white/[0.02] p-4"
+          >
+            <p className="text-sm text-white">
+              {item.message}
+            </p>
+
+            <p className="mt-1 text-xs text-gray-400">
+              {item.user?.name ?? "System"} ·{" "}
+              {new Date(item.createdAt).toLocaleString()}
+            </p>
+          </div>
+        ))
+      )}
+    </CardContent>
+  </Card>
+</section>
     </PageShell>
   );
 }

@@ -4,8 +4,29 @@ import { AuthSessionProvider } from "@/components/providers/session-provider";
 
 
 export const metadata: Metadata = {
-  title: "ClientForge",
-  description: "Premium client portal SaaS for freelancers, agencies, and small teams.",
+  metadataBase: new URL(
+    process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"
+  ),
+  title: {
+    default: "ClientForge - Client Work From Kickoff To Sign-off",
+    template: "%s | ClientForge",
+  },
+  description:
+    "A premium client portal SaaS for managing clients, projects, deliverables, approvals, analytics, and scoped client access.",
+  openGraph: {
+    title: "ClientForge - Client Work From Kickoff To Sign-off",
+    description:
+      "Manage client work, deliverables, approvals, and portal access in one production-shaped workspace.",
+    url: "/",
+    siteName: "ClientForge",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "ClientForge - Client Work From Kickoff To Sign-off",
+    description:
+      "A portfolio-grade client portal SaaS built with Next.js, Prisma, PostgreSQL, Cloudinary, and NextAuth.",
+  },
 };
 
 export default function RootLayout({

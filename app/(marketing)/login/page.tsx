@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { signIn } from "next-auth/react";
 import { useRouter } from "next/navigation";
+import { DemoLoginButtons } from "@/components/marketing/demo-login-buttons";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -30,7 +31,13 @@ export default function LoginPage() {
       return;
     }
 
-    router.push("/dashboard");
+    const roleResponse = await fetch("/api/me/workspace", {
+      cache: "no-store",
+    }).catch(() => null);
+    const roleData = roleResponse?.ok ? await roleResponse.json() : null;
+    const destination = roleData?.role === "CLIENT" ? "/portal" : "/dashboard";
+
+    router.push(destination);
     router.refresh();
   }
 
@@ -77,6 +84,14 @@ export default function LoginPage() {
             {loading ? "Signing in..." : "Login"}
           </button>
         </form>
+
+        <div className="my-6 flex items-center gap-3 text-xs uppercase tracking-[0.2em] text-gray-500">
+          <span className="h-px flex-1 bg-white/10" />
+          Demo
+          <span className="h-px flex-1 bg-white/10" />
+        </div>
+
+        <DemoLoginButtons compact />
 
         <p className="mt-6 text-sm text-gray-400">
           Don’t have an account?{" "}

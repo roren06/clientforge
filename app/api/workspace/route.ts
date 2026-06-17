@@ -1,8 +1,14 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { requireInternalAccess } from "@/lib/guards";
 
 export async function GET() {
-  const workspace = await prisma.workspace.findFirst({
+  const result = await requireInternalAccess();
+
+  const workspace = await prisma.workspace.findUnique({
+    where: {
+      id: result.workspace.id,
+    },
     include: {
       memberships: {
         include: {
