@@ -1,12 +1,26 @@
 # ClientForge
 
+**Live demo:** [https://clientforge-nu.vercel.app](https://clientforge-nu.vercel.app)
+
 ClientForge is a portfolio-grade client portal SaaS for freelancers, agencies, and service teams. It brings client records, project tracking, deliverables, approvals, comments, notifications, analytics, and a scoped client portal into one production-shaped workspace.
 
 The project is intentionally built to show more than UI: it includes multi-tenant authorization, Cloudinary file storage, input validation, rate limiting, route boundaries, seeded demo data, unit tests, and an end-to-end owner/client workflow.
 
+## Screenshots
+
+| Landing | Owner dashboard |
+| --- | --- |
+| ![ClientForge landing page](./public/screenshots/landing.png) | ![Owner dashboard](./public/screenshots/owner-dashboard.png) |
+
+| Project detail | Client portal |
+| --- | --- |
+| ![Project detail with deliverables](./public/screenshots/project-detail.png) | ![Scoped client portal](./public/screenshots/client-portal.png) |
+
+Use the live demo buttons on the landing page to explore as **Owner** or **Client** without creating an account.
+
 ## Demo Accounts
 
-Seeded local credentials:
+Seeded credentials for local development and the public demo:
 
 ```txt
 Owner
@@ -26,9 +40,9 @@ The client account is linked to the `Northstar Labs` client record, so `/portal`
 - Internal dashboard for owners/admins/members.
 - Client portal with linked-client isolation via `Client.userId`.
 - Deliverable workflow: draft, in review, approved, revision requested.
-- Cloudinary-backed deliverable file uploads.
-- Analytics overview for project and deliverable health.
-- AI summary placeholder with a deterministic fallback path.
+- Cloudinary-backed deliverable file uploads with authorized download proxy.
+- Analytics charts for project status, deliverable outcomes, and activity trends.
+- OpenAI project summaries with deterministic fallback.
 - Production hardening: route guards, object-level authorization, zod validation, rate limiting, error/loading/not-found boundaries.
 - Tests: Vitest permission unit tests and Playwright owner/client approval flow.
 
@@ -38,11 +52,12 @@ The client account is linked to the `Northstar Labs` client record, so `/portal`
 - React 19
 - TypeScript
 - Tailwind CSS v4
-- Prisma + PostgreSQL
+- Prisma + PostgreSQL (Neon)
 - NextAuth credentials auth
 - Cloudinary uploads
 - Upstash-compatible rate limiting
 - Zod validation
+- Recharts
 - Vitest + Playwright
 
 ## Architecture
@@ -54,11 +69,12 @@ Browser
   -> Guard helpers: requireInternalAccess / requireClientAccess
   -> Object-level authorization in API queries
   -> Prisma Client
-  -> PostgreSQL
+  -> PostgreSQL (Neon)
 
 Deliverable uploads
   -> /api/deliverables/[id]/file
   -> Cloudinary
+  -> authorized download via /api/deliverables/[id]/file/download
   -> fileUrl/fileName/fileSize/fileType stored on Deliverable
 
 Client portal
@@ -91,14 +107,15 @@ NEXTAUTH_SECRET
 CLOUDINARY_CLOUD_NAME
 CLOUDINARY_API_KEY
 CLOUDINARY_API_SECRET
-OPENAI_API_KEY
 ```
 
-Optional for production-grade rate limiting:
+Optional:
 
 ```txt
+OPENAI_API_KEY
 UPSTASH_REDIS_REST_URL
 UPSTASH_REDIS_REST_TOKEN
+NEXT_PUBLIC_APP_URL
 ```
 
 If Upstash variables are missing locally, ClientForge uses an in-memory rate-limit fallback.
@@ -128,12 +145,13 @@ npx prisma studio
 ## Scripts
 
 ```bash
-npm run dev        # Start local dev server
-npm run build      # Production build
-npm run lint       # ESLint
-npm test           # Vitest unit tests
-npm run test:e2e   # Playwright e2e tests
-npm run db:seed    # Seed demo workspace/users/projects
+npm run dev          # Start local dev server
+npm run build        # Production build
+npm run lint         # ESLint
+npm test             # Vitest unit tests
+npm run test:e2e     # Playwright e2e tests
+npm run screenshots  # Refresh README screenshots from the live demo
+npm run db:seed      # Seed demo workspace/users/projects
 ```
 
 ## Test Coverage
@@ -149,8 +167,44 @@ Run all current checks:
 npm test
 npx tsc --noEmit
 npm run lint
-npm run test:e2e -- e2e/owner-client-deliverable.spec.ts
+npm run build
+npm run test:e2e
 ```
+
+## Deployment
+
+Production stack: **Vercel + Neon + Cloudinary**.
+
+Required Vercel environment variables:
+
+```txt
+DATABASE_URL
+DIRECT_URL
+NEXTAUTH_URL
+NEXTAUTH_SECRET
+CLOUDINARY_CLOUD_NAME
+CLOUDINARY_API_KEY
+CLOUDINARY_API_SECRET
+CLOUDINARY_UPLOAD_FOLDER
+```
+
+Recommended:
+
+```txt
+NEXT_PUBLIC_APP_URL
+UPSTASH_REDIS_REST_URL
+UPSTASH_REDIS_REST_TOKEN
+OPENAI_API_KEY
+```
+
+After connecting Neon:
+
+```bash
+npx prisma migrate deploy
+npm run db:seed
+```
+
+In Cloudinary, enable **Allow delivery of PDF and ZIP files** under Settings → Security.
 
 ## Security And Correctness Notes
 
@@ -160,14 +214,12 @@ npm run test:e2e -- e2e/owner-client-deliverable.spec.ts
 - Cloudinary replaces local filesystem uploads for Vercel-safe storage.
 - AI summaries use OpenAI when configured and fall back to deterministic summaries if unavailable.
 - Rate limiting protects signup, uploads, comments, deliverable creation/status, and client review actions.
-- Dashboard server fetches forward cookies so authenticated internal APIs do not redirect to login.
 
 ## Roadmap
 
-See `architecture_plan.md` for the working roadmap. Near-term priorities:
+See `architecture_plan.md` for the full working roadmap. Remaining polish items:
 
-- Upgrade the marketing landing page into a full scroll narrative.
-- Add one-click demo entry points for owner/client roles.
-- Replace placeholder AI summaries with an LLM-backed route and fallback.
-- Wire global search or a command palette.
-- Add real charts to analytics.
+- Privacy/terms placeholder pages
+- Favicon and Lighthouse tuning
+- Optional public demo reset action
+- Optional command palette
