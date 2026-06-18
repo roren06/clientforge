@@ -225,7 +225,7 @@ In Cloudinary, enable **Allow delivery of PDF and ZIP files** under Settings →
 
 ## Roadmap
 
-See `architecture_plan.md` for the full working roadmap. Remaining polish items:
+Possible future polish:
 
 - Privacy/terms placeholder pages
 - Favicon and Lighthouse tuning
