@@ -2,16 +2,10 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { requireInternalAccess } from "@/lib/guards";
 import {
+  buildProjectStatusChart,
   countDeliverablesByStatus,
   countProjectsNeedingReview,
 } from "@/lib/analytics-metrics";
-
-const PROJECT_STATUSES = [
-  { status: "PLANNING", label: "Planning" },
-  { status: "ACTIVE", label: "Active" },
-  { status: "REVIEW", label: "In Review" },
-  { status: "COMPLETED", label: "Completed" },
-];
 
 const DELIVERABLE_STATUSES = [
   { status: "DRAFT", label: "Draft" },
@@ -43,9 +37,9 @@ export async function GET() {
       deliverablesApproved,
       deliverablesRevisionRequested,
       totalActivityLast7Days,
-      projectStatusGroups,
       deliverableStatusGroups,
       recentActivityLogs,
+      projectStatusChart,
     ] = await Promise.all([
       prisma.project.count({
         where: {
@@ -100,16 +94,6 @@ export async function GET() {
         },
       }),
 
-      prisma.project.groupBy({
-        by: ["status"],
-        where: {
-          workspaceId,
-        },
-        _count: {
-          _all: true,
-        },
-      }),
-
       prisma.deliverable.groupBy({
         by: ["status"],
         where: {
@@ -137,14 +121,11 @@ export async function GET() {
         },
       }),
 
+      buildProjectStatusChart(workspaceId),
     ]);
 
     const averageProgress = Math.round(
       averageProgressAggregate._avg.progress ?? 0
-    );
-    const projectStatusChart = toStatusChart(
-      PROJECT_STATUSES,
-      projectStatusGroups
     );
     const deliverableStatusChart = toStatusChart(
       DELIVERABLE_STATUSES,

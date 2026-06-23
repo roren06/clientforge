@@ -174,7 +174,7 @@ export default function AnalyticsPage() {
             <div className="xl:col-span-2 space-y-6">
               <ChartCard
                 title="Project Status Distribution"
-                description="Project lifecycle stages stored on each project record."
+                description="Projects grouped by workflow stage, including projects with deliverables awaiting client review."
               >
                 {hasProjectChartData ? (
                   <ResponsiveContainer width="100%" height={280}>
