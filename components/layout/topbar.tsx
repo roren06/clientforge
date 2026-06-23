@@ -194,13 +194,6 @@ export function Topbar() {
             </AvatarFallback>
           </Avatar>
 
-          <Link
-            href="/settings"
-            className="rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-xs text-white hover:bg-white/10"
-          >
-            Settings
-          </Link>
-
           <button
             onClick={() => signOut({ callbackUrl: "/" })}
             className="rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-xs text-white hover:bg-white/10"
