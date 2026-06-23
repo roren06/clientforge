@@ -156,7 +156,7 @@ export default function AnalyticsPage() {
             <MetricCard
               label="Projects In Review"
               value={data.projectsInReview}
-              helper="May need feedback or approval"
+              helper="Projects in review stage or with deliverables awaiting client review"
             />
             <MetricCard
               label="Completed Projects"
@@ -174,7 +174,7 @@ export default function AnalyticsPage() {
             <div className="xl:col-span-2 space-y-6">
               <ChartCard
                 title="Project Status Distribution"
-                description="Workspace projects grouped by current delivery stage."
+                description="Project lifecycle stages stored on each project record."
               >
                 {hasProjectChartData ? (
                   <ResponsiveContainer width="100%" height={280}>

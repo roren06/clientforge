@@ -3,6 +3,10 @@ import { StatCard } from "@/components/shared/stat-card";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { getAppBaseUrl } from "@/lib/app-url";
 import { requireInternalAccess } from "@/lib/guards";
+import {
+  countDeliverablesByStatus,
+  countProjectsNeedingReview,
+} from "@/lib/analytics-metrics";
 import { prisma } from "@/lib/prisma";
 import { cookies } from "next/headers";
 
@@ -20,6 +24,7 @@ type DashboardResponse = {
     clientName: string;
     status: string;
     progress: number;
+    deliverablesInReview?: number;
     createdAt: string;
   }[];
 };
@@ -78,12 +83,7 @@ async function getAnalyticsOverview(workspaceId: string): Promise<AnalyticsOverv
       },
     }),
 
-    prisma.project.count({
-      where: {
-        workspaceId,
-        status: "REVIEW",
-      },
-    }),
+    countProjectsNeedingReview(workspaceId),
 
     prisma.project.count({
       where: {
@@ -114,32 +114,11 @@ async function getAnalyticsOverview(workspaceId: string): Promise<AnalyticsOverv
       },
     }),
 
-    prisma.deliverable.count({
-      where: {
-        project: {
-          workspaceId,
-        },
-        status: "IN_REVIEW",
-      },
-    }),
+    countDeliverablesByStatus(workspaceId, "IN_REVIEW"),
 
-    prisma.deliverable.count({
-      where: {
-        project: {
-          workspaceId,
-        },
-        status: "APPROVED",
-      },
-    }),
+    countDeliverablesByStatus(workspaceId, "APPROVED"),
 
-    prisma.deliverable.count({
-      where: {
-        project: {
-          workspaceId,
-        },
-        status: "REVISION_REQUESTED",
-      },
-    }),
+    countDeliverablesByStatus(workspaceId, "REVISION_REQUESTED"),
 
     prisma.activityLog.count({
       where: {
@@ -187,7 +166,11 @@ export default async function DashboardPage() {
         <StatCard
           label="Projects in Review"
           value={String(analytics.projectsInReview)}
-          helper="Awaiting approval or final feedback"
+          helper={
+            analytics.deliverablesInReview > 0
+              ? `${analytics.deliverablesInReview} deliverable(s) awaiting client review`
+              : "Projects marked review or with deliverables in review"
+          }
         />
         <StatCard
           label="Clients"
@@ -204,7 +187,7 @@ export default async function DashboardPage() {
       <section className="grid gap-4 xl:grid-cols-3">
         <Card className="rounded-3xl border-white/10 bg-white/[0.03] text-white xl:col-span-2">
           <CardHeader>
-            <CardTitle>Recent Project Activity</CardTitle>
+            <CardTitle>Recent Projects</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4 text-sm text-gray-400">
             {recentActivity.length === 0 ? (
@@ -224,6 +207,10 @@ export default async function DashboardPage() {
                   <p className="mt-1">
                     Client: {item.clientName} · Status: {item.status} · Progress:{" "}
                     {item.progress}%
+                    {"deliverablesInReview" in item &&
+                    (item.deliverablesInReview ?? 0) > 0
+                      ? ` · ${item.deliverablesInReview} deliverable(s) in review`
+                      : ""}
                   </p>
                 </div>
               ))
@@ -257,7 +244,9 @@ export default async function DashboardPage() {
               </p>
               <p className="mt-1">
                 {analytics.projectsInReview > 0
-                  ? "These may need approval or client feedback soon."
+                  ? analytics.deliverablesInReview > 0
+                    ? `${analytics.projectsInReview} project(s) need attention, including ${analytics.deliverablesInReview} deliverable(s) in client review.`
+                    : "These may need approval or client feedback soon."
                   : "Review queue is currently clear."}
               </p>
             </div>

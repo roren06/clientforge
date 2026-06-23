@@ -1,6 +1,10 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { requireInternalAccess } from "@/lib/guards";
+import {
+  countDeliverablesByStatus,
+  countProjectsNeedingReview,
+} from "@/lib/analytics-metrics";
 
 const PROJECT_STATUSES = [
   { status: "PLANNING", label: "Planning" },
@@ -50,12 +54,7 @@ export async function GET() {
         },
       }),
 
-      prisma.project.count({
-        where: {
-          workspaceId,
-          status: "REVIEW",
-        },
-      }),
+      countProjectsNeedingReview(workspaceId),
 
       prisma.project.count({
         where: {
@@ -86,32 +85,11 @@ export async function GET() {
         },
       }),
 
-      prisma.deliverable.count({
-        where: {
-          project: {
-            workspaceId,
-          },
-          status: "IN_REVIEW",
-        },
-      }),
+      countDeliverablesByStatus(workspaceId, "IN_REVIEW"),
 
-      prisma.deliverable.count({
-        where: {
-          project: {
-            workspaceId,
-          },
-          status: "APPROVED",
-        },
-      }),
+      countDeliverablesByStatus(workspaceId, "APPROVED"),
 
-      prisma.deliverable.count({
-        where: {
-          project: {
-            workspaceId,
-          },
-          status: "REVISION_REQUESTED",
-        },
-      }),
+      countDeliverablesByStatus(workspaceId, "REVISION_REQUESTED"),
 
       prisma.activityLog.count({
         where: {
@@ -158,6 +136,7 @@ export async function GET() {
           createdAt: "asc",
         },
       }),
+
     ]);
 
     const averageProgress = Math.round(
