@@ -27,6 +27,7 @@ export async function GET() {
           }
         : null,
       role: result.role,
+      mustChangePassword: result.user.mustChangePassword,
     });
   } catch (error) {
     console.error("Failed to load workspace info:", error);

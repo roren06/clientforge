@@ -100,11 +100,16 @@ export function ClientInviteButton({
               Temporary password:{" "}
               <span className="font-semibold">{invite.temporaryPassword}</span>
             </p>
-          ) : (
+          ) : null}
+          {invite.temporaryPassword ? (
+            <p className="mt-1 text-emerald-100/80">
+              Share this securely. The client must change it on first login.
+            </p>
+          ) : invite.message?.includes("already active") ? (
             <p className="mt-1 text-emerald-100/80">
               No new password was generated for an existing account.
             </p>
-          )}
+          ) : null}
         </div>
       ) : null}
     </div>

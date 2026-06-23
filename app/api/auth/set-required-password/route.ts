@@ -2,16 +2,16 @@ import { NextResponse } from "next/server";
 import bcrypt from "bcryptjs";
 import { prisma } from "@/lib/prisma";
 import { requireWorkspaceAccess } from "@/lib/guards";
-import { changePasswordSchema } from "@/lib/password";
+import { requiredPasswordChangeSchema } from "@/lib/password";
 import { parseJsonBody } from "@/lib/validation";
 import { rateLimit, rateLimitKey } from "@/lib/rate-limit";
 
-export async function PATCH(request: Request) {
+export async function POST(request: Request) {
   const result = await requireWorkspaceAccess();
 
   try {
     const limited = await rateLimit(request, {
-      key: "change-password",
+      key: "set-required-password",
       identifier: rateLimitKey(result.user.id),
       limit: 5,
       window: "10 m",
@@ -22,42 +22,24 @@ export async function PATCH(request: Request) {
       return limited;
     }
 
-    const parsed = await parseJsonBody(request, changePasswordSchema);
+    if (!result.user.mustChangePassword) {
+      return NextResponse.json(
+        { error: "Password change is not required for this account." },
+        { status: 400 }
+      );
+    }
+
+    const parsed = await parseJsonBody(request, requiredPasswordChangeSchema);
 
     if (!parsed.success) {
       return parsed.response;
     }
 
-    const { currentPassword, newPassword } = parsed.data;
-
-    const user = await prisma.user.findUnique({
-      where: { id: result.user.id },
-      select: {
-        id: true,
-        passwordHash: true,
-      },
-    });
-
-    if (!user?.passwordHash) {
-      return NextResponse.json(
-        { error: "This account does not have a password set." },
-        { status: 400 }
-      );
-    }
-
-    const isValid = await bcrypt.compare(currentPassword, user.passwordHash);
-
-    if (!isValid) {
-      return NextResponse.json(
-        { error: "Current password is incorrect." },
-        { status: 400 }
-      );
-    }
-
+    const { newPassword } = parsed.data;
     const passwordHash = await bcrypt.hash(newPassword, 10);
 
     await prisma.user.update({
-      where: { id: user.id },
+      where: { id: result.user.id },
       data: {
         passwordHash,
         mustChangePassword: false,
@@ -66,12 +48,13 @@ export async function PATCH(request: Request) {
 
     return NextResponse.json({
       message: "Password updated successfully.",
+      mustChangePassword: false,
     });
   } catch (error) {
-    console.error("Failed to change password:", error);
+    console.error("Failed to set required password:", error);
 
     return NextResponse.json(
-      { error: "Failed to change password." },
+      { error: "Failed to update password." },
       { status: 500 }
     );
   }

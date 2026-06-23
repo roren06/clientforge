@@ -36,7 +36,13 @@ export default function LoginPage() {
       cache: "no-store",
     }).catch(() => null);
     const roleData = roleResponse?.ok ? await roleResponse.json() : null;
-    const destination = roleData?.role === "CLIENT" ? "/portal" : "/dashboard";
+    const mustChangePassword = Boolean(roleData?.mustChangePassword);
+    const destination =
+      roleData?.role === "CLIENT"
+        ? mustChangePassword
+          ? "/portal/set-password"
+          : "/portal"
+        : "/dashboard";
 
     router.push(destination);
     router.refresh();

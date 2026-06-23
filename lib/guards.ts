@@ -30,5 +30,11 @@ export async function requireInternalAccess() {
 }
 
 export async function requireClientAccess() {
-  return requireRole(["CLIENT"]);
+  const result = await requireRole(["CLIENT"]);
+
+  if (result.user.mustChangePassword) {
+    redirect("/portal/set-password");
+  }
+
+  return result;
 }

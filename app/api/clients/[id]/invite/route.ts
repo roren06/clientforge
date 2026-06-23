@@ -68,11 +68,23 @@ export async function POST(
     }
 
     if (client.userId && client.user?.passwordHash) {
+      const temporaryPassword = generateTemporaryPassword();
+      const passwordHash = await bcrypt.hash(temporaryPassword, 10);
+
+      await prisma.user.update({
+        where: { id: client.user.id },
+        data: {
+          passwordHash,
+          mustChangePassword: true,
+        },
+      });
+
       return NextResponse.json({
-        message: "Client portal access is already active.",
+        message:
+          "New temporary password generated. The client must change it on next login.",
         clientId: client.id,
         email: client.user.email,
-        temporaryPassword: null,
+        temporaryPassword,
         status: "ACTIVE",
       });
     }
@@ -103,6 +115,7 @@ export async function POST(
 
     const temporaryPassword = generateTemporaryPassword();
     const passwordHash = await bcrypt.hash(temporaryPassword, 10);
+    const issuedTemporaryPassword = !existingUser?.passwordHash;
 
     const user = existingUser
       ? await prisma.user.update({
@@ -112,6 +125,9 @@ export async function POST(
           data: {
             name: existingUser.name || client.name,
             passwordHash: existingUser.passwordHash ?? passwordHash,
+            mustChangePassword: issuedTemporaryPassword
+              ? true
+              : existingUser.mustChangePassword,
           },
         })
       : await prisma.user.create({
@@ -119,6 +135,7 @@ export async function POST(
             name: client.name,
             email,
             passwordHash,
+            mustChangePassword: true,
           },
         });
 
@@ -154,7 +171,7 @@ export async function POST(
         : "Client portal invite created.",
       clientId: client.id,
       email: user.email,
-      temporaryPassword: existingUser?.passwordHash ? null : temporaryPassword,
+      temporaryPassword: issuedTemporaryPassword ? temporaryPassword : null,
       status: "ACTIVE",
     });
   } catch (error) {

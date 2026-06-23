@@ -82,11 +82,13 @@ const clientUser = await prisma.user.upsert({
   update: {
     name: "Client Test User",
     passwordHash: clientUserPasswordHash,
+    mustChangePassword: false,
   },
   create: {
     name: "Client Test User",
     email: "client@clientforge.app",
     passwordHash: clientUserPasswordHash,
+    mustChangePassword: false,
   },
 });
 
