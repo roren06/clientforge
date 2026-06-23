@@ -108,6 +108,9 @@ export function Topbar() {
         <div className="relative w-full max-w-md">
           <Search className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
           <Input
+            type="search"
+            name="workspace-search"
+            autoComplete="off"
             value={query}
             onChange={(event) => {
               setQuery(event.target.value);

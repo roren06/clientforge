@@ -255,22 +255,26 @@ export default function SettingsPage() {
         </div>
       </div>
 
-      <section className="rounded-3xl border border-cyan-300/20 bg-cyan-300/[0.04] p-6">
+      <section className="rounded-3xl border border-white/10 bg-white/[0.04] p-6">
           <h2 className="text-lg font-semibold text-white">Change Password</h2>
           <p className="mt-1 text-sm text-gray-400">
             Update your account password. You&apos;ll need your current password.
           </p>
 
-          <div className="mt-6 grid gap-4 md:grid-cols-3">
+          <div className="mt-6 space-y-5">
             <div>
               <label className="mb-2 block text-sm text-gray-300">
                 Current password
               </label>
               <input
                 type="password"
+                name="settings-current-password"
+                autoComplete="off"
+                readOnly
+                onFocus={(e) => e.target.removeAttribute("readOnly")}
                 value={currentPassword}
                 onChange={(e) => setCurrentPassword(e.target.value)}
-                className="w-full rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-white outline-none"
+                className="w-full rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-white outline-none placeholder:text-gray-500"
               />
             </div>
 
@@ -280,10 +284,12 @@ export default function SettingsPage() {
               </label>
               <input
                 type="password"
+                name="settings-new-password"
+                autoComplete="new-password"
                 minLength={8}
                 value={newPassword}
                 onChange={(e) => setNewPassword(e.target.value)}
-                className="w-full rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-white outline-none"
+                className="w-full rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-white outline-none placeholder:text-gray-500"
               />
               <p className="mt-2 text-xs text-gray-500">
                 Must be at least 8 characters.
@@ -296,24 +302,26 @@ export default function SettingsPage() {
               </label>
               <input
                 type="password"
+                name="settings-confirm-password"
+                autoComplete="new-password"
                 minLength={8}
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
-                className="w-full rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-white outline-none"
+                className="w-full rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-white outline-none placeholder:text-gray-500"
               />
             </div>
-          </div>
 
-          <div className="mt-4 flex items-center justify-between">
-            <p className="text-sm text-gray-400">{passwordMessage ?? " "}</p>
+            <div className="flex items-center justify-between">
+              <p className="text-sm text-gray-400">{passwordMessage ?? " "}</p>
 
-            <button
-              onClick={handleChangePassword}
-              disabled={savingPassword}
-              className="rounded-2xl border border-white/10 bg-white/10 px-4 py-2 text-sm text-white hover:bg-white/20 disabled:opacity-60"
-            >
-              {savingPassword ? "Updating..." : "Update Password"}
-            </button>
+              <button
+                onClick={handleChangePassword}
+                disabled={savingPassword}
+                className="rounded-2xl border border-white/10 bg-white/10 px-4 py-2 text-sm text-white hover:bg-white/20 disabled:opacity-60"
+              >
+                {savingPassword ? "Updating..." : "Update Password"}
+              </button>
+            </div>
           </div>
         </section>
 
