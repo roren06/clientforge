@@ -48,14 +48,13 @@ export async function POST(request: Request) {
     }
 
     const token = await issuePasswordResetToken(user.id);
-    const emailResult = await sendPasswordResetEmail({
+    await sendPasswordResetEmail({
       to: user.email,
       token,
     });
 
     return NextResponse.json({
       message: genericSuccessMessage,
-      devResetUrl: emailResult.resetUrl,
     });
   } catch (error) {
     console.error("Failed to process forgot password request:", error);

@@ -62,8 +62,14 @@ export default function LoginPage() {
           </div>
 
           <div>
-            <div className="mb-2 flex items-center justify-between">
-              <label className="block text-sm text-gray-300">Password</label>
+            <label className="mb-2 block text-sm text-gray-300">Password</label>
+            <input
+              type="password"
+              className="w-full rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-white outline-none"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+            />
+            <div className="mt-2 text-right">
               <Link
                 href="/forgot-password"
                 className="text-xs text-gray-400 underline hover:text-white"
@@ -71,12 +77,6 @@ export default function LoginPage() {
                 Forgot password?
               </Link>
             </div>
-            <input
-              type="password"
-              className="w-full rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-white outline-none"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-            />
           </div>
 
           {error ? (

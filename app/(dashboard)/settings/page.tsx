@@ -216,7 +216,7 @@ export default function SettingsPage() {
   return (
     <PageShell
   title="Settings"
-  description="Manage your profile and workspace preferences."
+  description="Manage your profile, password, and workspace preferences."
 >
   {loading || !data ? (
     <div className="rounded-3xl border border-white/10 bg-white/[0.03] p-6 text-sm text-gray-400">
@@ -246,6 +246,68 @@ export default function SettingsPage() {
           Workspace Active
         </div>
       </div>
+
+      <section className="rounded-3xl border border-cyan-300/20 bg-cyan-300/[0.04] p-6">
+          <h2 className="text-lg font-semibold text-white">Change Password</h2>
+          <p className="mt-1 text-sm text-gray-400">
+            Update your account password. You&apos;ll need your current password.
+          </p>
+
+          <div className="mt-6 grid gap-4 md:grid-cols-3">
+            <div>
+              <label className="mb-2 block text-sm text-gray-300">
+                Current password
+              </label>
+              <input
+                type="password"
+                value={currentPassword}
+                onChange={(e) => setCurrentPassword(e.target.value)}
+                className="w-full rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-white outline-none"
+              />
+            </div>
+
+            <div>
+              <label className="mb-2 block text-sm text-gray-300">
+                New password
+              </label>
+              <input
+                type="password"
+                minLength={8}
+                value={newPassword}
+                onChange={(e) => setNewPassword(e.target.value)}
+                className="w-full rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-white outline-none"
+              />
+              <p className="mt-2 text-xs text-gray-500">
+                Must be at least 8 characters.
+              </p>
+            </div>
+
+            <div>
+              <label className="mb-2 block text-sm text-gray-300">
+                Confirm new password
+              </label>
+              <input
+                type="password"
+                minLength={8}
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                className="w-full rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-white outline-none"
+              />
+            </div>
+          </div>
+
+          <div className="mt-4 flex items-center justify-between">
+            <p className="text-sm text-gray-400">{passwordMessage ?? " "}</p>
+
+            <button
+              onClick={handleChangePassword}
+              disabled={savingPassword}
+              className="rounded-2xl border border-white/10 bg-white/10 px-4 py-2 text-sm text-white hover:bg-white/20 disabled:opacity-60"
+            >
+              {savingPassword ? "Updating..." : "Update Password"}
+            </button>
+          </div>
+        </section>
 
       {/* 🔹 Main Grid */}
       <div className="grid gap-6 xl:grid-cols-3">
@@ -316,68 +378,6 @@ export default function SettingsPage() {
               <p className="text-gray-400">
                 {workspaceDescription || "No description"}
               </p>
-            </div>
-          </div>
-        </section>
-
-        <section className="rounded-3xl border border-white/10 bg-white/[0.03] p-6">
-          <h2 className="text-lg font-semibold text-white">Password</h2>
-          <p className="mt-1 text-sm text-gray-400">
-            Update your account password. You&apos;ll need your current password.
-          </p>
-
-          <div className="mt-6 space-y-4">
-            <div>
-              <label className="mb-2 block text-sm text-gray-300">
-                Current password
-              </label>
-              <input
-                type="password"
-                value={currentPassword}
-                onChange={(e) => setCurrentPassword(e.target.value)}
-                className="w-full rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-white outline-none"
-              />
-            </div>
-
-            <div>
-              <label className="mb-2 block text-sm text-gray-300">
-                New password
-              </label>
-              <input
-                type="password"
-                minLength={8}
-                value={newPassword}
-                onChange={(e) => setNewPassword(e.target.value)}
-                className="w-full rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-white outline-none"
-              />
-              <p className="mt-2 text-xs text-gray-500">
-                Must be at least 8 characters.
-              </p>
-            </div>
-
-            <div>
-              <label className="mb-2 block text-sm text-gray-300">
-                Confirm new password
-              </label>
-              <input
-                type="password"
-                minLength={8}
-                value={confirmPassword}
-                onChange={(e) => setConfirmPassword(e.target.value)}
-                className="w-full rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-white outline-none"
-              />
-            </div>
-
-            <div className="flex items-center justify-between">
-              <p className="text-sm text-gray-400">{passwordMessage ?? " "}</p>
-
-              <button
-                onClick={handleChangePassword}
-                disabled={savingPassword}
-                className="rounded-2xl border border-white/10 bg-white/10 px-4 py-2 text-sm text-white hover:bg-white/20 disabled:opacity-60"
-              >
-                {savingPassword ? "Updating..." : "Update Password"}
-              </button>
             </div>
           </div>
         </section>
