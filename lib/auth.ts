@@ -41,11 +41,17 @@ export const authOptions: NextAuthOptions = {
           return null;
         }
 
+        const membership = await prisma.membership.findFirst({
+          where: { userId: user.id },
+          orderBy: { createdAt: "asc" },
+        });
+
         return {
           id: user.id,
           name: user.name,
           email: user.email,
           mustChangePassword: user.mustChangePassword,
+          role: membership?.role ?? null,
         };
       },
     }),
@@ -55,6 +61,7 @@ export const authOptions: NextAuthOptions = {
       if (user) {
         token.id = user.id;
         token.mustChangePassword = user.mustChangePassword ?? false;
+        token.role = user.role ?? null;
       }
 
       if (trigger === "update" && session?.mustChangePassword !== undefined) {
@@ -67,6 +74,7 @@ export const authOptions: NextAuthOptions = {
       if (session.user && token.id) {
         session.user.id = token.id as string;
         session.user.mustChangePassword = Boolean(token.mustChangePassword);
+        session.user.role = (token.role as string | null | undefined) ?? null;
       }
 
       return session;

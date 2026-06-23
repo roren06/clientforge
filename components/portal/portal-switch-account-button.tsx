@@ -7,7 +7,7 @@ export function PortalSwitchAccountButton() {
   return (
     <div className="flex flex-wrap gap-2">
       <Link
-        href="/settings"
+        href="/portal/settings"
         className="rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-xs font-medium text-white transition hover:bg-white/10"
       >
         Account settings

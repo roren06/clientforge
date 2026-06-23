@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import { PageShell } from "@/components/layout/page-shell";
 
 type SettingsData = {
@@ -19,6 +20,7 @@ type SettingsData = {
 };
 
 export default function SettingsPage() {
+  const router = useRouter();
   const [loading, setLoading] = useState(true);
   const [savingProfile, setSavingProfile] = useState(false);
   const [savingWorkspace, setSavingWorkspace] = useState(false);
@@ -209,6 +211,12 @@ export default function SettingsPage() {
   useEffect(() => {
     loadSettings();
   }, []);
+
+  useEffect(() => {
+    if (data?.role === "CLIENT") {
+      router.replace("/portal/settings");
+    }
+  }, [data?.role, router]);
 
   const canEditWorkspace =
     data?.role === "OWNER" || data?.role === "ADMIN";
