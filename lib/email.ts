@@ -25,7 +25,15 @@ export async function sendPasswordResetEmail({
       );
     }
 
-    return { sent: false };
+    return { sent: false, reason: "missing_api_key" as const };
+  }
+
+  const fromAddress = from.trim();
+  if (!fromAddress.includes("@")) {
+    console.error(
+      `[password-reset] Invalid PASSWORD_RESET_FROM_EMAIL value: ${fromAddress}`
+    );
+    return { sent: false, reason: "invalid_from_email" as const };
   }
 
   const response = await fetch("https://api.resend.com/emails", {
@@ -35,7 +43,7 @@ export async function sendPasswordResetEmail({
       "Content-Type": "application/json",
     },
     body: JSON.stringify({
-      from,
+      from: fromAddress,
       to: [to],
       subject: "Reset your ClientForge password",
       html: `

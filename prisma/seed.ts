@@ -7,14 +7,6 @@ async function main() {
 
   const passwordHash = await bcrypt.hash("password123", 10);
 
-  await prisma.user.updateMany({
-    where: { email: "angeleslaurenjohn@gmail.com" },
-    data: {
-      email: "demoacc@gmail.com",
-      name: "Demo Owner",
-    },
-  });
-
   const user = await prisma.user.upsert({
     where: { email: "demoacc@gmail.com" },
     update: {
@@ -24,6 +16,19 @@ async function main() {
     create: {
       name: "Demo Owner",
       email: "demoacc@gmail.com",
+      passwordHash,
+    },
+  });
+
+  const personalOwner = await prisma.user.upsert({
+    where: { email: "angeleslaurenjohn@gmail.com" },
+    update: {
+      name: "Demo Owner",
+      passwordHash,
+    },
+    create: {
+      name: "Demo Owner",
+      email: "angeleslaurenjohn@gmail.com",
       passwordHash,
     },
   });
@@ -48,6 +53,23 @@ async function main() {
     update: {},
     create: {
       userId: user.id,
+      workspaceId: workspace.id,
+      role: "OWNER",
+    },
+  });
+
+  await prisma.membership.upsert({
+    where: {
+      userId_workspaceId: {
+        userId: personalOwner.id,
+        workspaceId: workspace.id,
+      },
+    },
+    update: {
+      role: "OWNER",
+    },
+    create: {
+      userId: personalOwner.id,
       workspaceId: workspace.id,
       role: "OWNER",
     },

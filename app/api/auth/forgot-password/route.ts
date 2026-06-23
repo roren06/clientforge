@@ -48,10 +48,24 @@ export async function POST(request: Request) {
     }
 
     const token = await issuePasswordResetToken(user.id);
-    await sendPasswordResetEmail({
+    const emailResult = await sendPasswordResetEmail({
       to: user.email,
       token,
     });
+
+    if (!emailResult.sent) {
+      console.error(
+        `[password-reset] Email was not sent for ${user.email}. Check RESEND_API_KEY and PASSWORD_RESET_FROM_EMAIL.`
+      );
+
+      return NextResponse.json(
+        {
+          error:
+            "We could not send the reset email right now. Please try again shortly or contact support.",
+        },
+        { status: 503 }
+      );
+    }
 
     return NextResponse.json({
       message: genericSuccessMessage,
