@@ -22,15 +22,20 @@ export default function SettingsPage() {
   const [loading, setLoading] = useState(true);
   const [savingProfile, setSavingProfile] = useState(false);
   const [savingWorkspace, setSavingWorkspace] = useState(false);
+  const [savingPassword, setSavingPassword] = useState(false);
 
   const [data, setData] = useState<SettingsData | null>(null);
 
   const [profileName, setProfileName] = useState("");
   const [workspaceName, setWorkspaceName] = useState("");
   const [workspaceDescription, setWorkspaceDescription] = useState("");
+  const [currentPassword, setCurrentPassword] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
 
   const [profileMessage, setProfileMessage] = useState<string | null>(null);
   const [workspaceMessage, setWorkspaceMessage] = useState<string | null>(null);
+  const [passwordMessage, setPasswordMessage] = useState<string | null>(null);
 
   async function loadSettings() {
     try {
@@ -156,6 +161,51 @@ export default function SettingsPage() {
     }
   }
 
+  async function handleChangePassword() {
+    try {
+      setSavingPassword(true);
+      setPasswordMessage(null);
+
+      if (newPassword !== confirmPassword) {
+        throw new Error("New passwords do not match.");
+      }
+
+      const res = await fetch("/api/settings/password", {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          currentPassword,
+          newPassword,
+          confirmPassword,
+        }),
+      });
+
+      const json = await res.json();
+
+      if (!res.ok) {
+        if (json.issues?.[0]?.message) {
+          throw new Error(json.issues[0].message);
+        }
+
+        throw new Error(json.error || "Failed to update password.");
+      }
+
+      setPasswordMessage("Password updated successfully.");
+      setCurrentPassword("");
+      setNewPassword("");
+      setConfirmPassword("");
+    } catch (error) {
+      console.error(error);
+      setPasswordMessage(
+        error instanceof Error ? error.message : "Failed to update password."
+      );
+    } finally {
+      setSavingPassword(false);
+    }
+  }
+
   useEffect(() => {
     loadSettings();
   }, []);
@@ -266,6 +316,68 @@ export default function SettingsPage() {
               <p className="text-gray-400">
                 {workspaceDescription || "No description"}
               </p>
+            </div>
+          </div>
+        </section>
+
+        <section className="rounded-3xl border border-white/10 bg-white/[0.03] p-6">
+          <h2 className="text-lg font-semibold text-white">Password</h2>
+          <p className="mt-1 text-sm text-gray-400">
+            Update your account password. You&apos;ll need your current password.
+          </p>
+
+          <div className="mt-6 space-y-4">
+            <div>
+              <label className="mb-2 block text-sm text-gray-300">
+                Current password
+              </label>
+              <input
+                type="password"
+                value={currentPassword}
+                onChange={(e) => setCurrentPassword(e.target.value)}
+                className="w-full rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-white outline-none"
+              />
+            </div>
+
+            <div>
+              <label className="mb-2 block text-sm text-gray-300">
+                New password
+              </label>
+              <input
+                type="password"
+                minLength={8}
+                value={newPassword}
+                onChange={(e) => setNewPassword(e.target.value)}
+                className="w-full rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-white outline-none"
+              />
+              <p className="mt-2 text-xs text-gray-500">
+                Must be at least 8 characters.
+              </p>
+            </div>
+
+            <div>
+              <label className="mb-2 block text-sm text-gray-300">
+                Confirm new password
+              </label>
+              <input
+                type="password"
+                minLength={8}
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                className="w-full rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-white outline-none"
+              />
+            </div>
+
+            <div className="flex items-center justify-between">
+              <p className="text-sm text-gray-400">{passwordMessage ?? " "}</p>
+
+              <button
+                onClick={handleChangePassword}
+                disabled={savingPassword}
+                className="rounded-2xl border border-white/10 bg-white/10 px-4 py-2 text-sm text-white hover:bg-white/20 disabled:opacity-60"
+              >
+                {savingPassword ? "Updating..." : "Update Password"}
+              </button>
             </div>
           </div>
         </section>

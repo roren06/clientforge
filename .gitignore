@@ -41,6 +41,7 @@ yarn-error.log*
 
 # local planning notes (not published)
 architecture_plan.md
+INTERVIEW-CHEATSHEET.md
 
 # vercel
 .vercel

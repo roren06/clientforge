@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useState } from "react";
 import { signIn } from "next-auth/react";
 import { useRouter } from "next/navigation";
@@ -8,8 +9,8 @@ import { DemoLoginButtons } from "@/components/marketing/demo-login-buttons";
 export default function LoginPage() {
   const router = useRouter();
 
-  const [email, setEmail] = useState("lauren@example.com");
-  const [password, setPassword] = useState("password123");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
@@ -61,7 +62,15 @@ export default function LoginPage() {
           </div>
 
           <div>
-            <label className="mb-2 block text-sm text-gray-300">Password</label>
+            <div className="mb-2 flex items-center justify-between">
+              <label className="block text-sm text-gray-300">Password</label>
+              <Link
+                href="/forgot-password"
+                className="text-xs text-gray-400 underline hover:text-white"
+              >
+                Forgot password?
+              </Link>
+            </div>
             <input
               type="password"
               className="w-full rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-white outline-none"

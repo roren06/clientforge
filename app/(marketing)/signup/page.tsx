@@ -7,14 +7,21 @@ export default function SignupPage() {
   const router = useRouter();
 
   const [name, setName] = useState("");
-  const [email, setEmail] = useState("lauren@example.com");
-  const [password, setPassword] = useState("password123");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setError("");
+
+    if (password !== confirmPassword) {
+      setError("Passwords do not match.");
+      return;
+    }
+
     setLoading(true);
 
     const res = await fetch("/api/signup", {
@@ -22,13 +29,18 @@ export default function SignupPage() {
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({ name, email, password }),
+      body: JSON.stringify({ name, email, password, confirmPassword }),
     });
 
     const data = await res.json();
     setLoading(false);
 
     if (!res.ok) {
+      if (data.issues?.[0]?.message) {
+        setError(data.issues[0].message);
+        return;
+      }
+
       setError(data.error || "Failed to create account.");
       return;
     }
@@ -41,7 +53,7 @@ export default function SignupPage() {
       <div className="w-full max-w-md rounded-3xl border border-white/10 bg-white/[0.03] p-8 text-white">
         <h1 className="text-3xl font-semibold">Create account</h1>
         <p className="mt-2 text-sm text-gray-400">
-          Set up your ClientForge account.
+          Set up your agency workspace on ClientForge.
         </p>
 
         <form onSubmit={handleSubmit} className="mt-8 space-y-4">
@@ -49,6 +61,7 @@ export default function SignupPage() {
             <label className="mb-2 block text-sm text-gray-300">Name</label>
             <input
               type="text"
+              required
               className="w-full rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-white outline-none"
               value={name}
               onChange={(e) => setName(e.target.value)}
@@ -59,6 +72,7 @@ export default function SignupPage() {
             <label className="mb-2 block text-sm text-gray-300">Email</label>
             <input
               type="email"
+              required
               className="w-full rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-white outline-none"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
@@ -69,9 +83,26 @@ export default function SignupPage() {
             <label className="mb-2 block text-sm text-gray-300">Password</label>
             <input
               type="password"
+              required
+              minLength={8}
               className="w-full rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-white outline-none"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
+            />
+            <p className="mt-2 text-xs text-gray-500">Must be at least 8 characters.</p>
+          </div>
+
+          <div>
+            <label className="mb-2 block text-sm text-gray-300">
+              Confirm password
+            </label>
+            <input
+              type="password"
+              required
+              minLength={8}
+              className="w-full rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-white outline-none"
+              value={confirmPassword}
+              onChange={(e) => setConfirmPassword(e.target.value)}
             />
           </div>
 

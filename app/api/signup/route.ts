@@ -1,16 +1,10 @@
 import { NextResponse } from "next/server";
 import bcrypt from "bcryptjs";
 import { WorkspaceRole } from "@prisma/client";
-import { z } from "zod";
 import { prisma } from "@/lib/prisma";
+import { signupWithConfirmSchema } from "@/lib/password";
 import { parseJsonBody } from "@/lib/validation";
 import { rateLimit } from "@/lib/rate-limit";
-
-const signupSchema = z.object({
-  name: z.string().trim().min(1, "Name is required.").max(100),
-  email: z.string().trim().email("Enter a valid email address.").toLowerCase(),
-  password: z.string().min(8, "Password must be at least 8 characters."),
-});
 
 function buildWorkspaceSlug(seed: string): string {
   const base = seed
@@ -36,7 +30,7 @@ export async function POST(request: Request) {
       return limited;
     }
 
-    const parsed = await parseJsonBody(request, signupSchema);
+    const parsed = await parseJsonBody(request, signupWithConfirmSchema);
 
     if (!parsed.success) {
       return parsed.response;
